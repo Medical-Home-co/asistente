@@ -156,11 +156,11 @@
     </div>
 
 <script>
-        // Tu API Key (La he copiado de tu archivo)
+        // TU API KEY
         const API_KEY = 'AIzaSyDdpXnX4w2ZxaXyAlUOXyvqUY58oLlNaEE'; 
         
-        // Usaremos el modelo 'gemini-1.5-flash' que es rápido y gratuito
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+        // CORRECCIÓN: Usamos 'gemini-1.5-flash-latest' que es más estable para encontrar el modelo
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`;
 
         const chatBox = document.getElementById('chat-box');
         const userInput = document.getElementById('user-input');
@@ -170,14 +170,13 @@
             const messageDiv = document.createElement('div');
             messageDiv.classList.add('message');
             messageDiv.classList.add(sender === 'user' ? 'user-message' : 'bot-message');
-            // Renderizar saltos de linea
-            messageDiv.innerHTML = text.replace(/\n/g, '<br>');
+            messageDiv.innerHTML = text.replace(/\n/g, '<br>'); // Formateo simple
             chatBox.appendChild(messageDiv);
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
         async function getAIResponse(userMessage) {
-            addMessage('...', 'bot'); 
+            addMessage('...', 'bot');
             const loadingMessage = chatBox.lastElementChild;
 
             userInput.disabled = true;
@@ -195,27 +194,22 @@
                 });
 
                 const data = await response.json();
-                loadingMessage.remove(); // Borrar los puntos suspensivos
+                loadingMessage.remove();
 
-                // === BLOQUE DE DIAGNÓSTICO ===
-                // Aquí capturamos si Google nos da un error
+                // Manejo de errores detallado
                 if (data.error) {
-                    addMessage(`❌ ERROR DE GOOGLE: ${data.error.message}`, 'bot');
-                    console.error("Detalle del error:", data.error);
-                    return;
-                }
-                // ==============================
-
-                if (data.candidates && data.candidates.length > 0) {
+                    addMessage(`❌ ERROR: ${data.error.message}`, 'bot');
+                    console.error("Error API:", data.error);
+                } else if (data.candidates && data.candidates.length > 0) {
                     const aiText = data.candidates[0].content.parts[0].text;
                     addMessage(aiText, 'bot');
                 } else {
-                    addMessage("La respuesta vino vacía. Revisa la consola (F12).", 'bot');
+                    addMessage("No se recibió respuesta. Intenta con una pregunta diferente.", 'bot');
                 }
 
             } catch (error) {
                 loadingMessage.remove();
-                addMessage(`❌ ERROR DE CONEXIÓN: ${error.message}`, 'bot');
+                addMessage(`❌ Error de conexión: ${error.message}`, 'bot');
             } finally {
                 userInput.disabled = false;
                 sendBtn.disabled = false;
@@ -238,4 +232,5 @@
     </script>
 </body>
 </html>
+
 
