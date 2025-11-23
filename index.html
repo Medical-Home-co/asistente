@@ -155,10 +155,11 @@
         </div>
     </div>
 
-    <script>
-        // ⚠️ IMPORTANTE: REEMPLAZA ESTO CON TU API KEY DE GOOGLE ⚠️
+<script>
+        // Tu API Key (La he copiado de tu archivo)
         const API_KEY = 'AIzaSyDdpXnX4w2ZxaXyAlUOXyvqUY58oLlNaEE'; 
         
+        // Usaremos el modelo 'gemini-1.5-flash' que es rápido y gratuito
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
 
         const chatBox = document.getElementById('chat-box');
@@ -169,19 +170,15 @@
             const messageDiv = document.createElement('div');
             messageDiv.classList.add('message');
             messageDiv.classList.add(sender === 'user' ? 'user-message' : 'bot-message');
-            
-            // Convertir markdown básico (negritas) a HTML simple si es necesario
-            // Por ahora, solo convertimos saltos de línea
-            const formattedText = text.replace(/\n/g, '<br>');
-            messageDiv.innerHTML = formattedText;
-            
+            // Renderizar saltos de linea
+            messageDiv.innerHTML = text.replace(/\n/g, '<br>');
             chatBox.appendChild(messageDiv);
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
         async function getAIResponse(userMessage) {
-            addMessage('...', 'bot'); // Indicador visual simple
-            const loadingMessage = chatBox.lastElementChild; // Referencia para borrarlo luego
+            addMessage('...', 'bot'); 
+            const loadingMessage = chatBox.lastElementChild;
 
             userInput.disabled = true;
             sendBtn.disabled = true;
@@ -198,22 +195,27 @@
                 });
 
                 const data = await response.json();
-                
-                // Eliminar el indicador de carga "..."
-                loadingMessage.remove();
+                loadingMessage.remove(); // Borrar los puntos suspensivos
+
+                // === BLOQUE DE DIAGNÓSTICO ===
+                // Aquí capturamos si Google nos da un error
+                if (data.error) {
+                    addMessage(`❌ ERROR DE GOOGLE: ${data.error.message}`, 'bot');
+                    console.error("Detalle del error:", data.error);
+                    return;
+                }
+                // ==============================
 
                 if (data.candidates && data.candidates.length > 0) {
                     const aiText = data.candidates[0].content.parts[0].text;
                     addMessage(aiText, 'bot');
                 } else {
-                    addMessage("Lo siento, no entendí eso. ¿Puedes repetirlo?", 'bot');
-                    console.error('Respuesta inesperada:', data);
+                    addMessage("La respuesta vino vacía. Revisa la consola (F12).", 'bot');
                 }
 
             } catch (error) {
                 loadingMessage.remove();
-                addMessage("Error de conexión. Verifica tu API Key o internet.", 'bot');
-                console.error('Error:', error);
+                addMessage(`❌ ERROR DE CONEXIÓN: ${error.message}`, 'bot');
             } finally {
                 userInput.disabled = false;
                 sendBtn.disabled = false;
@@ -221,7 +223,6 @@
             }
         }
 
-        // Manejo de eventos
         sendBtn.addEventListener('click', () => {
             const message = userInput.value.trim();
             if (message) {
@@ -232,10 +233,9 @@
         });
 
         userInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                sendBtn.click();
-            }
+            if (e.key === 'Enter') sendBtn.click();
         });
     </script>
 </body>
 </html>
+
