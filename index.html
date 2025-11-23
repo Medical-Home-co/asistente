@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Aislado Asistente</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background: #f4f4f4; }
+        .chat-container { background: white; border: 1px solid #ccc; height: 400px; overflow-y: auto; padding: 10px; margin-bottom: 10px; border-radius: 8px; }
+        .msg { padding: 8px 12px; margin: 5px 0; border-radius: 15px; max-width: 80%; word-wrap: break-word; }
+        .user { background: #007bff; color: white; align-self: flex-end; margin-left: auto; }
+        .model { background: #e9ecef; color: black; align-self: flex-start; }
+        .controls { display: flex; gap: 10px; }
+        input { flex: 1; padding: 10px; border-radius: 5px; border: 1px solid #ccc; }
+        button { padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:disabled { background: #ccc; }
+        #status { font-size: 0.8rem; color: #666; margin-bottom: 5px; }
+        .error { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h2>Test Aislado de Conexión IA</h2>
+    <div id="status">Estado: Listo</div>
+    
+    <div id="chat-box" class="chat-container" style="display: flex; flex-direction: column;">
+        </div>
+
+    <div class="controls">
+        <input type="text" id="msg-input" placeholder="Escribe hola..." autocomplete="off">
+        <button id="send-btn">Enviar</button>
+    </div>
+
+    <script src="asis.js"></script>
+</body>
+</html>const fs = require("fs");
+
+// Paths
+const inputPath = "/mnt/data/style.css";
+const outputPath = "/mnt/data/style_safe_optimized.css";
+
+// Read original CSS
+let css = fs.readFileSync(inputPath, "utf8");
+
+// Helper: remove second duplicated block by selector regex
+function removeSecondBlock(cssText, selectorRegex) {
+    const pattern = new RegExp(`(${selectorRegex}\\s*\\{[^{}]*\\})`, "gs");
+    const matches = cssText.match(pattern);
+
+    if (matches && matches.length > 1) {
+        // Remove ONLY the second block
+        return cssText.replace(matches[1], "");
+    }
+    return cssText;
+}
+
+// 1. Remove duplicated .sidebar
+css = removeSecondBlock(css, "\\.sidebar");
+
+// 2. Remove duplicated .modal-content
+css = removeSecondBlock(css, "\\.modal-content");
+
+// 3. Remove duplicated block of all button styles
+const buttonGroupRegex =
+    "\\.button\\s*\\{[^{}]*\\}\\s*" +
+    "\\.button:hover\\s*\\{[^{}]*\\}\\s*" +
+    "\\.button-primary\\s*\\{[^{}]*\\}\\s*" +
+    "\\.button-primary:hover\\s*\\{[^{}]*\\}\\s*" +
+    "\\.button-secondary\\s*\\{[^{}]*\\}\\s*" +
+    "\\.button-secondary:hover\\s*\\{[^{}]*\\}";
+
+const btnPattern = new RegExp(`(${buttonGroupRegex})`, "gs");
+const btnMatches = css.match(btnPattern);
+
+if (btnMatches && btnMatches.length > 1) {
+    css = css.replace(btnMatches[1], "");
+}
+
+// Save the optimized CSS
+fs.writeFileSync(outputPath, css, "utf8");
+
+console.log("Archivo optimizado creado en:", outputPath);
