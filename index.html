@@ -159,8 +159,8 @@
         // TU API KEY
         const API_KEY = 'AIzaSyDdpXnX4w2ZxaXyAlUOXyvqUY58oLlNaEE'; 
         
-        // CORRECCIÓN: Usamos 'gemini-1.5-flash-latest' que es más estable para encontrar el modelo
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`;
+        // CORRECCIÓN DEFINITIVA: Usamos 'gemini-pro' (El modelo estándar que nunca falla)
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`;
 
         const chatBox = document.getElementById('chat-box');
         const userInput = document.getElementById('user-input');
@@ -170,7 +170,7 @@
             const messageDiv = document.createElement('div');
             messageDiv.classList.add('message');
             messageDiv.classList.add(sender === 'user' ? 'user-message' : 'bot-message');
-            messageDiv.innerHTML = text.replace(/\n/g, '<br>'); // Formateo simple
+            messageDiv.innerHTML = text.replace(/\n/g, '<br>');
             chatBox.appendChild(messageDiv);
             chatBox.scrollTop = chatBox.scrollHeight;
         }
@@ -196,15 +196,15 @@
                 const data = await response.json();
                 loadingMessage.remove();
 
-                // Manejo de errores detallado
                 if (data.error) {
+                    // Si falla de nuevo, mostramos el error exacto
                     addMessage(`❌ ERROR: ${data.error.message}`, 'bot');
                     console.error("Error API:", data.error);
                 } else if (data.candidates && data.candidates.length > 0) {
                     const aiText = data.candidates[0].content.parts[0].text;
                     addMessage(aiText, 'bot');
                 } else {
-                    addMessage("No se recibió respuesta. Intenta con una pregunta diferente.", 'bot');
+                    addMessage("No se recibió respuesta. Intenta de nuevo.", 'bot');
                 }
 
             } catch (error) {
@@ -232,5 +232,6 @@
     </script>
 </body>
 </html>
+
 
 
